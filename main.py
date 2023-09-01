@@ -79,7 +79,17 @@ def test_card(visible_card, hidden_card):
   # If there is nothing in common between the two cards
   else:
     compare_message = f'You won nothing! You still have {new_user.money}'
-  return font.render(compare_message, True, (0,0,0))
+  return font.render(compare_message, True, (0,0,0), text_bg)
+
+font = pygame.font.Font('freesansbold.ttf', 32)
+
+def load_cards():
+  WIN.blit(back_card,(first_hidden_loc))
+  WIN.blit(back_card,(second_hidden_loc))
+  WIN.blit(back_card,(third_hidden_loc))
+  WIN.blit(user_cards[0][0],(first_card_loc))
+  WIN.blit(user_cards[2][0],(second_card_loc))
+  WIN.blit(user_cards[4][0],(third_card_loc))
 
 
 suits = ['Hearts', 'Clubs', 'Diamonds', 'Spades']
@@ -98,10 +108,11 @@ first_hidden_loc = first_card_loc[0] + 60, first_card_loc[1] + 50
 second_hidden_loc = second_card_loc[0] + 60, second_card_loc[1] + 50
 third_hidden_loc = third_card_loc[0] + 60, third_card_loc[1] + 50
 text_loc = 20, HEIGHT - 100
+text_bg = pygame.Color("skyblue")
 
-font = pygame.font.Font('freesansbold.ttf', 32)
 global result
-result = font.render('Welcome to my game', True, (0,0,0))
+welcome_message = 'Welcome to my game, you will be starting with $500', 'It takes $2 to play the game, click a card to start'
+result = font.render(welcome_message[0], True, (0,0,0), text_bg)
 
 new_user = User('User', 500)
 
@@ -116,12 +127,9 @@ while True:
   second_card = pygame.Rect(second_card_loc, Scaled_card_size)
   third_card = pygame.Rect(third_card_loc, Scaled_card_size)
   WIN.fill("white")
-  WIN.blit(back_card,(first_hidden_loc))
-  WIN.blit(back_card,(second_hidden_loc))
-  WIN.blit(back_card,(third_hidden_loc))
-  WIN.blit(user_cards[0][0],(first_card_loc))
-  WIN.blit(user_cards[2][0],(second_card_loc))
-  WIN.blit(user_cards[4][0],(third_card_loc))
+  text_box = pygame.Rect((0, HEIGHT-150), (WIDTH, 150))
+  pygame.draw.rect(WIN, text_bg, text_box)
+  load_cards()
   WIN.blit(result,(text_loc))
 
   for event in pygame.event.get():
@@ -131,8 +139,10 @@ while True:
     if event.type == pygame.MOUSEBUTTONDOWN:
       # Set the x, y postions of the mouse click
       x, y = event.pos
-      
-      if first_card.collidepoint(x, y):
+        
+      if text_box.collidepoint(x, y):
+        result = font.render(welcome_message[1], True, (0,0,0), text_bg)
+      elif first_card.collidepoint(x, y):
         result = test_card(user_cards[0][1], user_cards[1][1])
         user_cards=start_game()
       elif second_card.collidepoint(x, y):
@@ -145,4 +155,4 @@ while True:
         print('invalid click')
       
   
-  pygame.display.update()
+  pygame.display.flip()

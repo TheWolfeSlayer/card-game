@@ -41,7 +41,7 @@ def get_card(deckOfCards):
   # Removes the card from the deck to prevent duplicates
   deckOfCards.remove(rand_card)
   # Returns the random card selected
-  return rand_card
+  return pygame.image.load(rand_card.image)
 
 suits = ['Hearts', 'Clubs', 'Diamonds', 'Spades']
 # Makes base deck
@@ -49,7 +49,7 @@ base_deck = [Card(value, suit) for value in range(1, 14) for suit in suits]
 
 card = pygame.image.load(base_deck[0].image)
 
-first_card = pygame.image.load(get_card(base_deck).image)
+first_card = get_card(base_deck)
 
 pygame.init()
 WIDTH, HEIGHT = 1280, 720

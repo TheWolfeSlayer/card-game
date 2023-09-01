@@ -1,6 +1,8 @@
 import pygame
 import random
 
+pygame.init()
+
 class Card():
   def __init__(self, value, suit):
     self.value = value
@@ -41,7 +43,7 @@ def get_card(deckOfCards):
   # Removes the card from the deck to prevent duplicates
   temp_deck.remove(rand_card)
   # Returns the random card selected
-  return pygame.image.load(rand_card.image), rand_card
+  return pygame.transform.rotozoom(pygame.image.load(rand_card.image), 0, 3), rand_card
 
 def start_game():
   deck = [Card(value, suit) for value in range(1, 14) for suit in suits]
@@ -58,26 +60,26 @@ def start_game():
   return first_visible_card, first_hidden_card, second_visible_card, second_hidden_card, third_visible_card, third_hidden_card
 
 def test_card(visible_card, hidden_card):
-  print(f'Comparing {visible_card.value} of {visible_card.suit} with {hidden_card.value} of {hidden_card.suit}')
   # If cards share the same color and number
   if visible_card.value == hidden_card.value and visible_card.color == hidden_card.color:
     new_user.money += 20
-    print(f'Cards are the same color and suit(+$20), player now has {new_user.money}')
+    compare_message = f'Cards are the same color and suit(+$20), player now has {new_user.money}'
   # If cards share the same number
   elif visible_card.value == hidden_card.value:
     new_user.money += 10
-    print(f'Cards are the same number(+$10), player now has {new_user.money}')
+    compare_message = f'Cards are the same number(+$10), player now has {new_user.money}'
   # If cards share the same suit
   elif visible_card.suit == hidden_card.suit:
     new_user.money += 5
-    print(f'Cards are the same suit(+$5), player now has {new_user.money}')
+    compare_message = f'Cards are the same suit(+$5), player now has {new_user.money}'
   # If cards share the same color
   elif visible_card.color == hidden_card.color:
     new_user.money += 1
-    print(f'Cards are the same color($+1), player now has {new_user.money}')
+    compare_message = f'Cards are the same color($+1), player now has {new_user.money}'
   # If there is nothing in common between the two cards
   else:
-    print(f'You won nothing! You still have {new_user.money}')
+    compare_message = f'You won nothing! You still have {new_user.money}'
+  return font.render(compare_message, True, (0,0,0))
 
 
 suits = ['Hearts', 'Clubs', 'Diamonds', 'Spades']
@@ -87,27 +89,40 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Fun card game")
 
 CARD_SIZE = 96,144
+Scale = 3
+Scaled_card_size = CARD_SIZE[0] * Scale, CARD_SIZE[1] * Scale
 first_card_loc = 0,0
-second_card_loc = 150,0
-third_card_loc = 300,0
+second_card_loc = 375,0
+third_card_loc = 750,0
+first_hidden_loc = first_card_loc[0] + 60, first_card_loc[1] + 50
+second_hidden_loc = second_card_loc[0] + 60, second_card_loc[1] + 50
+third_hidden_loc = third_card_loc[0] + 60, third_card_loc[1] + 50
+text_loc = 20, HEIGHT - 100
 
-new_user = User('Math', 500)
+font = pygame.font.Font('freesansbold.ttf', 32)
+global result
+result = font.render('Welcome to my game', True, (0,0,0))
 
-back_card = pygame.image.load('./cards/card-back1.png')
+new_user = User('User', 500)
+
+back_card = pygame.transform.rotozoom(pygame.image.load('./cards/card-back1.png'), 0, 3)
 user_cards=start_game()
 
+
+
 while True:
-  pygame.init()
-  first_card = pygame.Rect(first_card_loc, CARD_SIZE)
-  second_card = pygame.Rect(second_card_loc, CARD_SIZE)
-  third_card = pygame.Rect(third_card_loc, CARD_SIZE)
+  
+  first_card = pygame.Rect(first_card_loc, Scaled_card_size)
+  second_card = pygame.Rect(second_card_loc, Scaled_card_size)
+  third_card = pygame.Rect(third_card_loc, Scaled_card_size)
   WIN.fill("white")
-  WIN.blit(back_card,(30,20))
+  WIN.blit(back_card,(first_hidden_loc))
+  WIN.blit(back_card,(second_hidden_loc))
+  WIN.blit(back_card,(third_hidden_loc))
   WIN.blit(user_cards[0][0],(first_card_loc))
-  WIN.blit(back_card,(180, 20))
   WIN.blit(user_cards[2][0],(second_card_loc))
-  WIN.blit(back_card,(330, 20))
   WIN.blit(user_cards[4][0],(third_card_loc))
+  WIN.blit(result,(text_loc))
 
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
@@ -118,13 +133,16 @@ while True:
       x, y = event.pos
       
       if first_card.collidepoint(x, y):
-        test_card(user_cards[0][1], user_cards[1][1])
+        result = test_card(user_cards[0][1], user_cards[1][1])
+        user_cards=start_game()
       elif second_card.collidepoint(x, y):
-        test_card(user_cards[2][1], user_cards[3][1])
+        result = test_card(user_cards[2][1], user_cards[3][1])
+        user_cards=start_game()
       elif third_card.collidepoint(x, y):
-        test_card(user_cards[4][1], user_cards[5][1])
+        result = test_card(user_cards[4][1], user_cards[5][1])
+        user_cards=start_game()
       else:
         print('invalid click')
-      user_cards=start_game()
+      
   
   pygame.display.update()
